@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  position: relative; /* Added to ensure relative positioning for the container */
 }
 
 .App-logo {
@@ -28,6 +29,18 @@
   color: #61dafb;
 }
 
+.btn-topright {
+  position: fixed;
+  top: 20px; /* Adjust this value as needed to control the vertical position */
+  right: 20px; /* Adjust this value as needed to control the horizontal position */
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -35,4 +48,34 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
