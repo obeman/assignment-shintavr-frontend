@@ -4,6 +4,9 @@ import axios from "axios";
 export default function ListPost({ token, doLogout, username }) {
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState({ name: "", body: "" });
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+  const [updatedContent, setUpdatedContent] = useState("");
+  const [selectedPost, setSelectedPost] = useState(null);
 
   useEffect(() => {
     if (token) {
@@ -67,7 +70,8 @@ export default function ListPost({ token, doLogout, username }) {
     console.log("Headers: " + JSON.stringify(headers));
     try {
       const deletePost = {
-        id : idPost,
+        id: idPost,
+        username: username,
       };
       const res = await axios.post(
         "http://localhost:5000/posts/delete-post",
@@ -81,7 +85,42 @@ export default function ListPost({ token, doLogout, username }) {
     }
   };
 
+  const handleUpdate = (post) => {
+    setShowUpdateDialog(true);
+    setSelectedPost(post);
+    setUpdatedContent(post.body);
+  };
 
+  const handleUpdateSubmit = async () => {
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
+    try {
+      const updatedPost = {
+        ...selectedPost,
+        body: updatedContent,
+        username: username,
+      };
+
+      console.log("Updated post: ",updatedPost);
+      const res = await axios.post(
+        "http://localhost:5000/posts/update-post",
+        updatedPost,
+        { headers }
+      );
+      alert("Post updated successfully!");
+      setShowUpdateDialog(false);
+      setUpdatedContent("");
+      window.location.reload();
+    } catch (error) {
+      console.error("Error: ", error);
+    }
+  };
+
+  const handleUpdateCancel = () => {
+    setShowUpdateDialog(false);
+    setUpdatedContent("");
+  };
 
   return (
     <div style={{ position: "relative" }}>
@@ -104,11 +143,28 @@ export default function ListPost({ token, doLogout, username }) {
         {posts.map((post) => (
           <li key={post.id}>
             <strong>{post.name}</strong>: {post.body}
-            {/* <button onClick={() => handleUpdate(post)}>Update</button> */}
+            <button onClick={() => handleUpdate(post)}>Update</button>
             <button onClick={() => handleDelete(post.docId)}>Delete</button>
           </li>
         ))}
       </ul>
+      {/* Update Popup Dialog */}
+      {showUpdateDialog && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Update Post</h2>
+            <input
+              type="text"
+              name="body"
+              value={updatedContent}
+              onChange={(e) => setUpdatedContent(e.target.value)}
+              placeholder="Enter updated content"
+            />
+            <button onClick={handleUpdateSubmit}>Update</button>
+            <button onClick={handleUpdateCancel}>Cancel</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
