@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-export default function ListPost({ token, doLogout, username }) {
+export default function ListPost({ token, doLogout, user}) {
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState({ name: "", body: "" });
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [updatedContent, setUpdatedContent] = useState("");
   const [selectedPost, setSelectedPost] = useState(null);
+  const [showProfilePopup, setShowProfilePopup] = useState(false);
+  const [email, setEmail] = useState("");
+  const [profilename, setProfilename] = useState("");
+  const [photoURL, setPhotoURL] = useState("");
+
 
   useEffect(() => {
     if (token) {
@@ -39,20 +44,21 @@ export default function ListPost({ token, doLogout, username }) {
   };
 
   const handleSubmit = async () => {
+    console.log("user : ", user);
     const headers = {
       Authorization: `Bearer ${token}`,
     };
     console.log("Headers: " + JSON.stringify(headers));
     try {
       const timestamp = new Date();
-      const updatedPost = {
+      const createPost = {
         ...newPost,
-        name: username, //get the username of email
+        user : user,
         timestamp: timestamp.toISOString(),
       };
       const res = await axios.post(
         "http://localhost:5000/posts/create-post",
-        updatedPost,
+        createPost,
         { headers }
       );
       alert("New post added successfully!");
@@ -71,7 +77,7 @@ export default function ListPost({ token, doLogout, username }) {
     try {
       const deletePost = {
         id: idPost,
-        username: username,
+        user: user,
       };
       const res = await axios.post(
         "http://localhost:5000/posts/delete-post",
@@ -99,10 +105,10 @@ export default function ListPost({ token, doLogout, username }) {
       const updatedPost = {
         ...selectedPost,
         body: updatedContent,
-        username: username,
+        user: user,
       };
 
-      console.log("Updated post: ",updatedPost);
+      console.log("Updated post: ", updatedPost);
       const res = await axios.post(
         "http://localhost:5000/posts/update-post",
         updatedPost,
@@ -117,9 +123,41 @@ export default function ListPost({ token, doLogout, username }) {
     }
   };
 
+  const handleProfile = async () => {
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
+    try {
+
+      console.log("user : ", user);
+      const res = await axios.post(
+        "http://localhost:5000/profiles/user",
+        {
+          user : user
+        },
+        { headers }
+      );
+      console.log("zap res : ", res.data);
+      setEmail(res.data.email);
+      setProfilename(res.data.username);
+      setPhotoURL(res.data.photoURL);
+    } catch (error) {
+      console.error("Error: ", error);
+    }
+  };
+
   const handleUpdateCancel = () => {
     setShowUpdateDialog(false);
     setUpdatedContent("");
+  };
+
+  const toggleProfilePopup = () => {
+    if (showProfilePopup) {
+      setShowProfilePopup(false);
+    } else {
+      setShowProfilePopup(true);
+      handleProfile();
+    }
   };
 
   return (
@@ -127,6 +165,9 @@ export default function ListPost({ token, doLogout, username }) {
       <h1>List Post</h1>
       <button className="btn-topright" onClick={doLogout}>
         Logout
+      </button>
+      <button className="btn-notso-topright" onClick={toggleProfilePopup}>
+        Profile
       </button>
       <div>
         <input
@@ -138,16 +179,20 @@ export default function ListPost({ token, doLogout, username }) {
         />
         <button onClick={handleSubmit}>Post</button>
       </div>
-      {/* Display posts */}
-      <ul>
-        {posts.map((post) => (
-          <li key={post.id}>
-            <strong>{post.name}</strong>: {post.body}
-            <button onClick={() => handleUpdate(post)}>Update</button>
-            <button onClick={() => handleDelete(post.docId)}>Delete</button>
-          </li>
-        ))}
-      </ul>
+      {/* Profile Popup Dialog */}
+      {showProfilePopup && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Profile</h2>
+            {/* Add your profile information here */}
+            {/* For example: */}
+            <img src={photoURL} alt="photo pic" ></img>
+            <p>Username: {profilename}</p>
+            <p>Email: {email}</p>
+            <button onClick={toggleProfilePopup}>Close</button>
+          </div>
+        </div>
+      )}
       {/* Update Popup Dialog */}
       {showUpdateDialog && (
         <div className="modal">
@@ -165,6 +210,17 @@ export default function ListPost({ token, doLogout, username }) {
           </div>
         </div>
       )}
+      {/* Display posts */}
+      <ul>
+        {posts.map((post) => (
+          <li key={post.id}>
+            <strong>{post.name}</strong>: {post.body}
+            <button onClick={() => handleUpdate(post)}>Update</button>
+            <button onClick={() => handleDelete(post.docId)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+      
     </div>
   );
 }

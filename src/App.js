@@ -21,6 +21,7 @@ function App() {
     );
   const [token, setToken] = useState("");
   const [username, setUsername] = useState("");
+  const [user, setUser] = useState("");
 
   useEffect(() => {
     auth.onAuthStateChanged((user) => {
@@ -30,8 +31,8 @@ function App() {
         user.getIdToken().then((token) => {
           setToken(token);
         });  
-        
         setUsername(user.displayName);
+        setUser(user);
       
       }
     })
@@ -72,7 +73,7 @@ function App() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         {authGoogle ? (
-          <ListPost token={token} doLogout={doLogout} username={username}/>
+          <ListPost token={token} doLogout={doLogout} user={user}/>
         ) : (
         <button onClick={doLogin}>Login with Google</button>
         )}

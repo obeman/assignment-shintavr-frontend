@@ -41,6 +41,18 @@
   cursor: pointer;
 }
 
+.btn-notso-topright {
+  position: fixed;
+  top: 20px; /* Adjust this value as needed to control the vertical position */
+  right: 120px; /* Adjust this value as needed to control the horizontal position */
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
